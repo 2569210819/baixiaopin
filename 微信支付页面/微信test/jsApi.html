@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>微信支付样例-支付</title>
+	</head>
+
+	<body>
+		<!--测试域名   添加白名单   发布测试-->
+		<!--代码嵌入到付款页面   发起付款方式改为调用jsapi-->
+
+		<!--点击支付向后端发起请求-->
+		<button type="button" onclick="callpay()">微信支付测试</button>
+
+		<script type="text/javascript">
+			function onBridgeReady() {
+				//向后端发起请求    并赋给相应的参数
+				var appId;
+				var timeStamp;
+				var nonceStr;
+				var packAge;
+				var signType;
+				var paySign;
+				$.ajax({
+					type: "post",
+					url: "",
+					async: true,
+					data: "",
+					dataType: "json",
+					success: function(data) {
+						appId = data.appId;
+						timeStamp = data.timeStamp;
+						nonceStr = data.nonceStr;
+						packAge = data.packAge;
+						signType = data.signType;
+						paySign = data.paySign;
+                       //在回调函数中执行微信支付调取
+						WeixinJSBridge.invoke(
+							'getBrandWCPayRequest', {
+								"appId": appId, //公众号名称，由商户传入     
+								"timeStamp": timeStamp, //时间戳，自1970年以来的秒数     
+								"nonceStr": nonceStr, //随机串     
+								"package": packAge,
+								"signType": signType, //微信签名方式：     
+								"paySign": paySign //微信签名 
+							},
+							function(res) {
+								if(res.err_msg == "get_brand_wcpay_request:ok") {} // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。 
+							}
+						);
+					}
+				});
+
+			}
+
+			function callpay() {
+
+				if(typeof WeixinJSBridge == "undefined") {
+					if(document.addEventListener) {
+						document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+					} else if(document.attachEvent) {
+						document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+						document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+					}
+				} else {
+					onBridgeReady();
+				}
+			}
+
+		
+		</script>
+	</body>
+
+</html>
